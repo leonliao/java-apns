@@ -1,7 +1,7 @@
 package com.notnoop.apns.utils.Simulator;
 
 import com.google.common.base.Strings;
-import com.notnoop.apns.EnhancedApnsNotification;
+import com.notnoop.apns.ApnsNotification;
 import com.notnoop.apns.internal.Utilities;
 
 import javax.net.ServerSocketFactory;
@@ -96,7 +96,7 @@ public class ApnsSimulatorWithVerification extends ApnsServerSimulator {
         return new DoResponse(notification);
     }
 
-    public DoResponse when(EnhancedApnsNotification notification) {
+    public DoResponse when(ApnsNotification notification) {
         return new DoResponse(buildNotification(notification));
     }
 
@@ -139,7 +139,7 @@ public class ApnsSimulatorWithVerification extends ApnsServerSimulator {
         }
     }
 
-    public Notification buildNotification(EnhancedApnsNotification notification) {
+    public Notification buildNotification(ApnsNotification notification) {
         return new Notification(1, notification.getIdentifier(), notification.getExpiry(),
                 notification.getDeviceToken(), notification.getPayload());
     }

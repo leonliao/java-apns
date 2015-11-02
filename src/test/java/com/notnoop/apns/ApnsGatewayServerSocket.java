@@ -7,13 +7,16 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
 import java.util.concurrent.ExecutorService;
+
 import javax.net.ssl.SSLContext;
+
+import com.notnoop.apns.ApnsNotification.FrameId;
+import com.notnoop.apns.ApnsNotification.Priority;
 
 /**
  * Represents the Apple APNS server. This allows testing outside of the Apple
  * servers.
  */
-@SuppressWarnings("deprecation")
 public class ApnsGatewayServerSocket extends AbstractApnsServerSocket {
 	private final ApnsServerService apnsServerService;
 
@@ -25,40 +28,69 @@ public class ApnsGatewayServerSocket extends AbstractApnsServerSocket {
 		this.apnsServerService = apnsServerService;
 	}
 
+	public static int byteArrayToInt(byte[] b, int offset) {
+		int value = 0;
+		for (int i = 0; i < 4; i++) {
+			int shift = (4 - 1 - i) * 8;
+			value += (b[i + offset] & 0x000000FF) << shift;
+		}
+		return value;
+	}
+
 	@Override
 	void handleSocket(Socket socket) throws IOException {
 		InputStream inputStream = socket.getInputStream();
 		DataInputStream dataInputStream = new DataInputStream(inputStream);
 		while (true) {
+			int command;
+
+			int frameBytesLeft = 0;
+
+			int frameId;
+			short frameLength;
+			byte[] frameData;
 			int identifier = 0;
+
 			try {
-				int read = dataInputStream.read();
-				if (read == -1) {
+				command = dataInputStream.read();
+				frameBytesLeft = dataInputStream.readInt();
+				byte[] deviceTokenBytes = null;
+				byte[] payloadBytes = null;
+				int expiry = 0;
+				Priority priority = null;
+				while (frameBytesLeft > 0) {
+					frameId = dataInputStream.read();
+					frameLength = dataInputStream.readShort();
+					frameData = toArray(inputStream, frameLength);
+
+					frameBytesLeft = frameBytesLeft - 1 - 2 - frameLength;
+					if (frameId == FrameId.DEVICE_TOKEN.getByteValue()) {
+						deviceTokenBytes = frameData;
+					} else if (frameId == FrameId.PAYLOAD.getByteValue()) {
+						payloadBytes = frameData;
+					} else if (frameId == FrameId.EXPIRATION_DATE
+							.getByteValue()) {
+						expiry = byteArrayToInt(frameData, 0);
+					} else if (frameId == FrameId.PRIORITY.getByteValue()) {
+						if (frameData[0] == Priority.SEND_AT_CONVENIENCE
+								.getByteValue()) {
+							priority = Priority.SEND_AT_CONVENIENCE;
+						} else {
+							priority = Priority.SEND_IMMEDIATELY;
+						}
+					} else if (frameId == FrameId.NOTIFICATION_ID
+							.getByteValue()) {
+						identifier = byteArrayToInt(frameData, 0);
+					}
+				}
+
+				if(command!=ApnsNotification.COMMAND) {
+					writeResponse(socket, identifier, 8, 1);
 					break;
 				}
-
-				boolean enhancedFormat = read == 1;
-				int expiry = 0;
-				if (enhancedFormat) {
-					identifier = dataInputStream.readInt();
-					expiry = dataInputStream.readInt();
-				}
-
-				int deviceTokenLength = dataInputStream.readShort();
-				byte[] deviceTokenBytes = toArray(inputStream,
-						deviceTokenLength);
-
-				int payloadLength = dataInputStream.readShort();
-				byte[] payloadBytes = toArray(inputStream, payloadLength);
-
 				ApnsNotification message;
-				if (enhancedFormat) {
-					message = new EnhancedApnsNotification(identifier, expiry,
-							deviceTokenBytes, payloadBytes);
-				} else {
-					message = new SimpleApnsNotification(deviceTokenBytes,
-							payloadBytes);
-				}
+				message = new ApnsNotification(identifier, expiry,
+						deviceTokenBytes, payloadBytes, priority);
 				apnsServerService.messageReceived(message);
 			} catch (IOException ioe) {
 				writeResponse(socket, identifier, 8, 1);
@@ -68,6 +100,8 @@ public class ApnsGatewayServerSocket extends AbstractApnsServerSocket {
 				break;
 			}
 		}
+		
+		System.out.println("Ended");
 	}
 
 	private void writeResponse(Socket socket, int identifier, int command,
@@ -88,8 +122,8 @@ public class ApnsGatewayServerSocket extends AbstractApnsServerSocket {
 	private byte[] toArray(InputStream inputStream, int size)
 			throws IOException {
 		byte[] bytes = new byte[size];
-        final DataInputStream dis = new DataInputStream(inputStream);
-        dis.readFully(bytes);
+		final DataInputStream dis = new DataInputStream(inputStream);
+		dis.readFully(bytes);
 		return bytes;
 	}
 }

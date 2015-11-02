@@ -34,6 +34,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
 
+import com.notnoop.apns.ApnsNotification.Priority;
 import com.notnoop.exceptions.NetworkIOException;
 
 /**
@@ -65,7 +66,7 @@ public interface ApnsService {
      */
     ApnsNotification push(String deviceToken, String payload) throws NetworkIOException;
 
-    EnhancedApnsNotification push(String deviceToken, String payload, Date expiry) throws NetworkIOException;
+    ApnsNotification push(String deviceToken, String payload, Date expiry, Priority priority) throws NetworkIOException;
 
     /**
      * Sends a push notification with the provided {@code payload} to the
@@ -82,7 +83,7 @@ public interface ApnsService {
      */
     ApnsNotification push(byte[] deviceToken, byte[] payload) throws NetworkIOException;
 
-    EnhancedApnsNotification push(byte[] deviceToken, byte[] payload, int expiry) throws NetworkIOException;
+    ApnsNotification push(byte[] deviceToken, byte[] payload, int expiry, Priority priority) throws NetworkIOException;
 
     /**
      * Sends a bulk push notification with the provided
@@ -98,7 +99,7 @@ public interface ApnsService {
      *      attempting to send the message
      */
     Collection<? extends ApnsNotification> push(Collection<String> deviceTokens, String payload) throws NetworkIOException;
-    Collection<? extends EnhancedApnsNotification> push(Collection<String> deviceTokens, String payload, Date expiry) throws NetworkIOException;
+    Collection<? extends ApnsNotification> push(Collection<String> deviceTokens, String payload, Date expiry, Priority priority) throws NetworkIOException;
 
     /**
      * Sends a bulk push notification with the provided
@@ -114,7 +115,7 @@ public interface ApnsService {
      *      attempting to send the message
      */
     Collection<? extends ApnsNotification> push(Collection<byte[]> deviceTokens, byte[] payload) throws NetworkIOException;
-    Collection<? extends EnhancedApnsNotification> push(Collection<byte[]> deviceTokens, byte[] payload, int expiry) throws NetworkIOException;
+    Collection<? extends ApnsNotification> push(Collection<byte[]> deviceTokens, byte[] payload, int expiry, Priority priority) throws NetworkIOException;
 
     /**
      * Sends the provided notification {@code message} to the desired

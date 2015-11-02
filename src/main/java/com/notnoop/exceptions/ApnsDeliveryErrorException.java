@@ -12,7 +12,11 @@ import com.notnoop.apns.DeliveryError;
  */
 public class ApnsDeliveryErrorException extends ApnsException {
 
-    private final DeliveryError deliveryError;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = -5682875904814023912L;
+	private final DeliveryError deliveryError;
 
     public ApnsDeliveryErrorException(DeliveryError error) {
         this.deliveryError = error;

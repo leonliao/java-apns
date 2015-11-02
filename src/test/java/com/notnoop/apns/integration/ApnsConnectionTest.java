@@ -1,24 +1,25 @@
 package com.notnoop.apns.integration;
 
-import com.notnoop.apns.APNS;
-import com.notnoop.apns.ApnsService;
-import com.notnoop.apns.EnhancedApnsNotification;
-import com.notnoop.apns.SimpleApnsNotification;
-import com.notnoop.apns.utils.ApnsServerStub;
-import com.notnoop.apns.utils.junit.DumpThreadsOnErrorRule;
-import com.notnoop.apns.utils.junit.Repeat;
-import com.notnoop.apns.utils.junit.RepeatRule;
+import static com.notnoop.apns.utils.FixedCertificates.LOCALHOST;
+import static com.notnoop.apns.utils.FixedCertificates.clientContext;
+import static org.junit.Assert.assertArrayEquals;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
 
-import static com.notnoop.apns.utils.FixedCertificates.*;
-import static org.junit.Assert.*;
+import com.notnoop.apns.APNS;
+import com.notnoop.apns.ApnsNotification;
+import com.notnoop.apns.ApnsNotification.Priority;
+import com.notnoop.apns.ApnsService;
+import com.notnoop.apns.utils.ApnsServerStub;
+import com.notnoop.apns.utils.junit.DumpThreadsOnErrorRule;
+import com.notnoop.apns.utils.junit.Repeat;
+import com.notnoop.apns.utils.junit.RepeatRule;
 
 
-@SuppressWarnings("ALL")
 public class ApnsConnectionTest {
 
     @Rule
@@ -31,14 +32,19 @@ public class ApnsConnectionTest {
     public DumpThreadsOnErrorRule dumpRule = new DumpThreadsOnErrorRule();
 
     ApnsServerStub server;
-    static SimpleApnsNotification msg1 = new SimpleApnsNotification("a87d8878d878a79", "{\"aps\":{}}");
-    static SimpleApnsNotification msg2 = new SimpleApnsNotification("a87d8878d878a88", "{\"aps\":{}}");
-    static EnhancedApnsNotification eMsg1 = new EnhancedApnsNotification(EnhancedApnsNotification.INCREMENT_ID(),
-            1, "a87d8878d878a88", "{\"aps\":{}}");
-    static EnhancedApnsNotification eMsg2 = new EnhancedApnsNotification(EnhancedApnsNotification.INCREMENT_ID(),
-            1, "a87d8878d878a88", "{\"aps\":{}}");
-    static EnhancedApnsNotification eMsg3 = new EnhancedApnsNotification(EnhancedApnsNotification.INCREMENT_ID(),
-            1, "a87d8878d878a88", "{\"aps\":{}}");
+	static ApnsNotification msg1 = new ApnsNotification(1,
+			ApnsNotification.MAXIMUM_EXPIRY, "2342", "{}",
+			Priority.SEND_IMMEDIATELY);
+
+	static ApnsNotification msg2 = new ApnsNotification(1,
+			ApnsNotification.MAXIMUM_EXPIRY, "2342", "{}",
+			Priority.SEND_IMMEDIATELY);
+    static ApnsNotification eMsg1 = new ApnsNotification(ApnsNotification.INCREMENT_ID(),
+            1, "a87d8878d878a88", "{\"aps\":{}}", Priority.SEND_IMMEDIATELY);
+    static ApnsNotification eMsg2 = new ApnsNotification(ApnsNotification.INCREMENT_ID(),
+            1, "a87d8878d878a88", "{\"aps\":{}}", Priority.SEND_IMMEDIATELY);
+    static ApnsNotification eMsg3 = new ApnsNotification(ApnsNotification.INCREMENT_ID(),
+            1, "a87d8878d878a88", "{\"aps\":{}}", Priority.SEND_IMMEDIATELY);
     private int gatewayPort;
 
     @Before

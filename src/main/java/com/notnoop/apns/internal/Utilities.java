@@ -45,14 +45,17 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
+
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManagerFactory;
-import com.notnoop.exceptions.InvalidSSLConfig;
-import com.notnoop.exceptions.NetworkIOException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.notnoop.exceptions.InvalidSSLConfig;
+import com.notnoop.exceptions.NetworkIOException;
 
 public final class Utilities {
     private static Logger logger = LoggerFactory.getLogger(Utilities.class);
@@ -291,7 +294,6 @@ public final class Utilities {
         }
     }
 
-    @SuppressWarnings({"PointlessArithmeticExpression", "PointlessBitwiseExpression"})
     public static int parseBytes(final int b1, final int b2, final int b3, final int b4) {
         return  ((b1 << 3 * 8) & 0xFF000000)
               | ((b2 << 2 * 8) & 0x00FF0000)

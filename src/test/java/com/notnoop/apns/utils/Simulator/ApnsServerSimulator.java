@@ -182,6 +182,7 @@ public abstract class ApnsServerSimulator {
             byte priority = get(map, ApnsInputStream.Item.ID_PRIORITY).getByte();
 
             final Notification notification = new Notification(2, identifier, expiry, deviceToken, payload, priority);
+            System.out.println(notification);
             logger.debug("Read framed notification {}", notification);
             onNotification(notification, inputOutputSocket);
 

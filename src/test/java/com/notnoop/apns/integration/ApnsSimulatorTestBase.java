@@ -1,10 +1,16 @@
 package com.notnoop.apns.integration;
 
-import com.notnoop.apns.*;
-import com.notnoop.apns.internal.Utilities;
-import com.notnoop.apns.utils.FixedCertificates;
-import com.notnoop.apns.utils.Simulator.ApnsServerSimulator;
-import com.notnoop.apns.utils.Simulator.FailingApnsServerSimulator;
+import static com.notnoop.apns.utils.FixedCertificates.LOCALHOST;
+import static com.notnoop.apns.utils.FixedCertificates.clientContext;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
+import java.util.Random;
+import java.util.concurrent.TimeUnit;
+
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
@@ -15,20 +21,20 @@ import org.junit.rules.TestName;
 import org.mockito.Matchers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import uk.org.lidalia.slf4jext.Level;
 import uk.org.lidalia.slf4jtest.LoggingEvent;
 import uk.org.lidalia.slf4jtest.TestLoggerFactory;
 
-import java.util.Random;
-import java.util.concurrent.TimeUnit;
-
-import static com.notnoop.apns.utils.FixedCertificates.LOCALHOST;
-import static com.notnoop.apns.utils.FixedCertificates.clientContext;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import com.notnoop.apns.APNS;
+import com.notnoop.apns.ApnsDelegate;
+import com.notnoop.apns.ApnsNotification;
+import com.notnoop.apns.ApnsNotification.Priority;
+import com.notnoop.apns.ApnsService;
+import com.notnoop.apns.internal.Utilities;
+import com.notnoop.apns.utils.FixedCertificates;
+import com.notnoop.apns.utils.Simulator.ApnsServerSimulator;
+import com.notnoop.apns.utils.Simulator.FailingApnsServerSimulator;
 
 public class ApnsSimulatorTestBase {
     final Logger logger = LoggerFactory.getLogger(ApnsSimulatorTestBase.class);
@@ -108,7 +114,7 @@ public class ApnsSimulatorTestBase {
      *             </ul>
      * @return an APNS notification
      */
-    private EnhancedApnsNotification makeNotification(final int code) {
+    private ApnsNotification makeNotification(final int code) {
         byte[] deviceToken = new byte[32];
         random.nextBytes(deviceToken);
         if (code == 0) {
@@ -133,7 +139,7 @@ public class ApnsSimulatorTestBase {
             }
 
         }
-        return new EnhancedApnsNotification(EnhancedApnsNotification.INCREMENT_ID(), 1, deviceToken, Utilities.toUTF8Bytes(payload));
+        return new ApnsNotification(ApnsNotification.INCREMENT_ID(), 1, deviceToken, Utilities.toUTF8Bytes(payload), Priority.SEND_IMMEDIATELY);
     }
 
     protected void sendCount(final int count, final int code) {

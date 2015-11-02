@@ -1,16 +1,18 @@
 package com.notnoop.apns.internal;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import java.io.IOException;
 import java.util.concurrent.Semaphore;
 
 import org.junit.Test;
-import static org.mockito.Mockito.*;
 
 import com.notnoop.apns.ApnsNotification;
+import com.notnoop.apns.ApnsNotification.Priority;
 import com.notnoop.apns.ApnsService;
-import com.notnoop.apns.EnhancedApnsNotification;
 import com.notnoop.exceptions.NetworkIOException;
 
 public class QueuedApnsServiceTest {
@@ -20,8 +22,8 @@ public class QueuedApnsServiceTest {
         QueuedApnsService service = new QueuedApnsService(null);
         service.push(notification);
     }
-    EnhancedApnsNotification notification = new EnhancedApnsNotification(1,
-            EnhancedApnsNotification.MAXIMUM_EXPIRY, "2342", "{}");
+    ApnsNotification notification = new ApnsNotification(1,
+            ApnsNotification.MAXIMUM_EXPIRY, "2342", "{}", Priority.SEND_IMMEDIATELY);
 
     @Test
     public void pushEventually() {
